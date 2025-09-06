@@ -1,0 +1,17 @@
+{
+  "name": "flask-to-node-conversion",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "fs": "0.0.1-security",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^3.3.2",
+    "form-data": "^4.0.0"
+  }
+}
